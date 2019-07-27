@@ -1,8 +1,8 @@
-<%@page import="com.hcl.Boot.Model.Item ,java.util.List"%>
+<%@page import="com.hcl.Boot.Model.Order ,java.util.List, java.util.Arrays"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
     
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,6 +31,9 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 <script src="js/bootstrap.js"></script>
 <!-- light-box -->
 <link rel="stylesheet" href="css/lightbox.css">
+<!-- DataTables CSS -->
+<link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css " rel="stylesheet">
+
 <!-- //light-box -->
 <script src="js/SmoothScroll.min.js"></script>
 <!--search jQuery-->
@@ -53,7 +56,15 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 	   alert(str);
 	  }).change();
 </script>
-
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script>
+					
+							$(document).ready(function () {
+							$('#dtBasicExample').DataTable();
+							$('.dataTables_length').addClass('bs-select');
+						});
+					</script>
 <script>
 $(document).ready(function() { 
 	$("#owl-demo").owlCarousel({
@@ -102,8 +113,9 @@ $(document).ready(function() {
 					</h1>
 				</div>
 				<% 
-String uname=(String)session.getAttribute("username"+session.getId()); 
-out.print("Welcome "+ uname);
+//String uname=(String)session.getAttribute("username"+session.getId()); 
+			String username= (String) request.getSession().getAttribute("username"+session.getId());
+out.print("Welcome "+ username);
 //session.setAttribute("sessname",uname); 
 %> 
 				<div class="top-nav">
@@ -113,10 +125,13 @@ out.print("Welcome "+ uname);
 						<!-- Collect the nav links, forms, and other content for toggling -->
 						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 							<ul class="nav navbar-nav">
-								<li><a class="active" href="index.html"><%= uname %></a></li>
+								<li><a class="active" href="index.html"><%= username %></a></li>
 								<li><a href="/myOrder">My Order</a></li>
-								<li><a href="/index">Index</a>
-									
+								<li><a href="#" class="dropdown-toggle hvr-bounce-to-bottom" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Codes<span class="caret"></span></a>
+									<ul class="dropdown-menu">
+										<li><a class="hvr-bounce-to-bottom" href="icons.html">Icons</a></li>
+										<li><a class="hvr-bounce-to-bottom" href="typography.html">Typography</a></li>          
+									</ul>
 								</li>								
 								<li><a href="/login">Login</a></li>
 								<li><a href="/signup">Signup</a></li>
@@ -188,126 +203,64 @@ out.print("Welcome "+ uname);
 	<div class="services" id="services">
 		<div class="container">
 			<div class="services-heading">
-				<h2>Order your Food</h2>
+				<h2>Your Order</h2>
 			</div>
 			<div class="w3-agileits-services-grids">
-				<div class="col-md-4 w3-agileits-services-left">
-					<div class="services-info">
-						
-					</div>
-				</div>
-				<div class="col-md-8 w3-agileits-services-right">
+				
+				<div class="col-md-12 w3-agileits-services-right">
 					<div class="services-right-grids">
-						<div class="col-sm-6 services-right-grid">
-					<!-- 	<script>
-						("#selectedItem").change(function(){
-							var categoryId = $(this).val();
-					        $.ajax({
-					            type: 'POST',
-					            url: "http://localhost:8081/getItem",
-					            data: {"price" : price},
-					            success: function(data){
-					            	alert(data);
-					            	console.log(data);
-					                var slctSubcat=$('#price'), option="";
-					                slctSubcat.empty();
-
-					                for(var i=0; i<data.length; i++){
-					                    option = option + "<option value='"+data[i].id + "'>"+data[i].getPrice() + "</option>";
-					                }
-					                slctSubcat.append(option);
-					            },
-					            error:function(){
-					                alert("error");
-					            }
-
-					        });
-					    });
-						</script> -->
-					<span style="color:red">${item.get(0).getMessage()}</span>
-							<form action="/placeOrder" method="POST">
-								
-								<div class="input-group wow fadeInUp animated" data-wow-delay=".5s">
-									<span class="input-group-addon" id="basic-addon1">@</span>
-								
-								 <select class="form-control" id="selectedItem"  name="oitem_id" placeholder="Select the item">
-									<option value="0">Select the Item</option>
-							
-									<%!List<Item> item=null; %>
-									
-									<%
-									item= (List) request.getAttribute("item");
-									for(int i=0;i<item.size();i++){
-										%>
-									
-										<option value="<%=item.get(i).getItem_id() %>"><%=item.get(i).getIname()%> : <%=item.get(i).getIprice() %></option>
-										<%
-									}
-										%>
-									
-										
-								
-								</select> 
-								<input type="hidden" name="order_by" value="<%= uname %>" />
-								</div>
-								<div class="input-group wow fadeInUp animated" data-wow-delay=".5s">
-									<span class="input-group-addon" id="basic-addon1">*</span>
-									<input type="text" class="form-control"  placeholder="Quantity" name="quantity" aria-describedby="basic-addon1">
-								</div>
-								<div class="input-group wow fadeInUp animated" data-wow-delay=".5s">
-									<button type="submit" class="btn btn-success">Submit</button>
-								</div>
-							</form>
+						<div class="col-md-12 ">
+					
+							<table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+							  <thead>
+							    <tr>
+							     <th class="th-sm"> S.NO</th>
+							      <th class="th-sm">Item 
+							      </th>
+							      <th class="th-sm">Quantity
+							      </th>
+							      <th class="th-sm">Order by
+							      </th>
+							      <th class="th-sm">Order Status
+							      </th>
+							      <th class="th-sm">Total
+							      </th>
+							    </tr>
+							  </thead>
+							  <tbody>
+							  
+							 
+						 <% // List<Order> order=(List) request.getAttribute("order"); %>
+							  <c:forEach  items="${order}" var="orders" varStatus="counter"> 
+							 
+							    <tr>
+							    <td><c:out value="${counter.index+1 }"/></td>
+								  <td><c:out value="${orders.getItem_name()}"/></td>
+							      <td><c:out value="${orders.getQuantity()}"/></td>
+							      <td><%= username %></td>
+							      <td>
+							      	<c:if test ="${orders.getOrder_status() == 0}">
+							      		<c:out value="In-Progress"/>
+							    	</c:if>
+							    	<c:if test="${orders.getOrder_status() == 1}">
+							    		  <c:out value="Delivered"/>
+							    	</c:if>
+							    </td>
+							      <td><c:out value="${orders.getAmount()}"/></td>
+							    </tr>
+							 </c:forEach>
+							</tbody>
+							 
+							</table>
 						</div>
 						
-						<div class="clearfix"> </div>
-					</div>
-					<div class="services-right-grids">
-						<div class="col-sm-6 services-right-grid">
-							<div class="services-icon hvr-radial-in">
-								<i class="fa fa-heartbeat" aria-hidden="true"></i>
-							</div>
-							<div class="services-icon-info">
-								<h5>Phasellus suscipit</h5>
-								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed orci enim, posuere sed tincidunt et, pellentesque eget mi.</p>
-							</div>
-						</div>
-						<div class="col-sm-6 services-right-grid">
-							<div class="services-icon hvr-radial-in">
-								<i class="fa fa-magnet" aria-hidden="true"></i>
-							</div>
-							<div class="services-icon-info">
-								<h5>Phasellus suscipit</h5>
-								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed orci enim, posuere sed tincidunt et, pellentesque eget mi.</p>
-							</div>
-						</div>
-						<div class="clearfix"> </div>
-					</div>
-					<div class="services-right-grids">
-						<div class="col-sm-6 services-right-grid">
-							<div class="services-icon hvr-radial-in">
-							<i class="fa fa-thumbs-up" aria-hidden="true"></i>
-							</div>
-							<div class="services-icon-info">
-								<h5>Phasellus suscipit</h5>
-								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed orci enim, posuere sed tincidunt et, pellentesque eget mi.</p>
-							</div>
-						</div>
-						<div class="col-sm-6 services-right-grid">
-							<div class="services-icon hvr-radial-in">
-								<i class="fa fa-heartbeat" aria-hidden="true"></i>
-							</div>
-							<div class="services-icon-info">
-								<h5>Phasellus suscipit</h5>
-								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed orci enim, posuere sed tincidunt et, pellentesque eget mi.</p>
-							</div>
-						</div>
-						<div class="clearfix"> </div>
-					</div>
+					
+					
 				</div>
 				<div class="clearfix"> </div>
 			</div>
 		</div>
+	</div>
 	</div>
 	<!-- //services -->
 	<!-- offer -->
